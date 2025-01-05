@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { TelegramBotClient } from '@/@lib/telegram-bot'
-import logger from '@/@lib/logger'
 import { db } from '@/@lib/db'
 import { enqueueAnalysis } from '@/@lib/queue'
 import { extractTextFromImage } from '@/@lib/image-processor'
