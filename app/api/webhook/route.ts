@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     console.log('Webhook endpoint hit')
     
     const update = await request.json()
-    console.log('Update received:', update)
+    console.log('Update received:', JSON.stringify(update))
 
     if (!update.message) {
       return NextResponse.json({ ok: false, error: 'Invalid update format' })
