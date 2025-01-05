@@ -152,7 +152,7 @@ export default function Home() {
 
               <div className="pt-2">
                 <a
-                  href="https://t.me/SherlockFakeNewsCheck_Bot"
+                  href="https://t.me/FakeNewsCheck_Bot"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-[#006039] hover:bg-[#007044] text-white px-6 py-3 rounded-lg transition-colors text-base font-semibold"

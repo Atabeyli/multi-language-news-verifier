@@ -36,7 +36,7 @@ export class TelegramBotClient {
 
   static async downloadFile(filePath: string): Promise<Buffer> {
     const bot = this.getInstance();
-    return bot.downloadFile(filePath, './tmp');
+    const downloadedFile = await bot.downloadFile(filePath, './tmp');
+    return Buffer.from(downloadedFile);
   }
 }
-

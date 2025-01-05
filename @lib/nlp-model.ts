@@ -1,18 +1,21 @@
-import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { LocaleData, Country } from './localization';
-import { LRUCache } from 'lru-cache';
+import OpenAI from 'openai'
+import { LocaleData, Country } from './localization'
+import { LRUCache } from 'lru-cache'
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+})
 
 const analysisCache = new LRUCache<string, any>({
   max: 100,
   ttl: 1000 * 60 * 60, // 1 saat
-});
+})
 
 export async function performNLPAnalysis(text: string, locale: LocaleData, country: Country) {
-  const cacheKey = `${country}:${text}`;
-  const cachedResult = analysisCache.get(cacheKey);
+  const cacheKey = `${country}:${text}`
+  const cachedResult = analysisCache.get(cacheKey)
   if (cachedResult) {
-    return cachedResult;
+    return cachedResult
   }
 
   const prompt = `
@@ -42,16 +45,20 @@ Provide a JSON response with the following structure:
   "explanation": string explaining the analysis,
   "suggestedActions": array of strings with recommended actions
 }
-`;
+`
 
-  const { text: analysisResult } = await generateText({
-    model: openai('gpt-4-turbo'),
-    prompt: prompt,
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [{ role: 'user', content: prompt }],
     temperature: 0.2,
-    maxTokens: 500,
-  });
+    max_tokens: 500,
+  })
 
-  analysisCache.set(cacheKey, analysisResult);
-  return analysisResult;
+  const analysisResult = response.choices[0].message.content
+
+  if (analysisResult) {
+    analysisCache.set(cacheKey, analysisResult)
+  }
+
+  return analysisResult
 }
-

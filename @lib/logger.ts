@@ -5,9 +5,17 @@ const logger = pino({
   transport: {
     target: 'pino-pretty',
     options: {
-      colorize: true
+      colorize: true,
+      translateTime: 'HH:MM:ss Z',
+      ignore: 'pid,hostname',
     }
-  }
+  },
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() }
+    }
+  },
+  timestamp: () => `,"time":"${new Date().toISOString()}"`
 })
 
 export default logger
