@@ -7,13 +7,13 @@ import { extractTextFromImage } from '@/@lib/image-processor'
 import { Country } from '@/@lib/localization'
 
 export async function POST(request: NextRequest) {
+  console.log('Webhook endpoint hit')
   try {
-    console.log('Webhook endpoint hit')
-    
     const update = await request.json()
     console.log('Update received:', JSON.stringify(update))
 
     if (!update.message) {
+      console.log('Invalid update format')
       return NextResponse.json({ ok: false, error: 'Invalid update format' })
     }
 
@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
     const text = update.message.text
     const photo = update.message.photo
 
+    console.log(`Processing message for chat ID ${chatId}`)
+
     if (text === '/start') {
+      console.log('Start command received')
       try {
         const welcomeMessage = `Haber Doğrulama Asistanı'na Hoş Geldiniz! 🔍
 Lütfen dilinizi seçin / Please select your language:
@@ -31,6 +34,7 @@ Lütfen dilinizi seçin / Please select your language:
 /start_RU - Русский 🇷🇺`
 
         await TelegramBotClient.sendMessage(chatId, welcomeMessage)
+        console.log('Welcome message sent')
         return NextResponse.json({ ok: true })
       } catch (error) {
         console.error('Error sending welcome message:', error)
@@ -39,6 +43,7 @@ Lütfen dilinizi seçin / Please select your language:
     }
 
     if (text?.startsWith('/start_')) {
+      console.log('Language selection received')
       const lang = text.split('_')[1] as Country
       db.setUserCountry(chatId, lang)
       let message = ''
@@ -56,26 +61,33 @@ Lütfen dilinizi seçin / Please select your language:
           message = 'Invalid language selection. Please use /start to choose a language.'
       }
       await TelegramBotClient.sendMessage(chatId, message)
+      console.log('Language confirmation sent')
       return NextResponse.json({ ok: true })
     }
 
+    console.log('Processing regular message or image')
     const userCountry = db.getUserCountry(chatId)
     if (!userCountry) {
+      console.log('No language selected for user')
       await TelegramBotClient.sendMessage(chatId, 'Please select a language first using /start')
       return NextResponse.json({ ok: true })
     }
 
     if (text) {
+      console.log('Processing text message')
       await enqueueAnalysis(text, userCountry, chatId)
     } else if (photo) {
+      console.log('Processing photo message')
       const fileId = photo[photo.length - 1]?.file_id
       if (!fileId) {
+        console.log('No valid file_id in photo message')
         await TelegramBotClient.sendMessage(chatId, 'Sorry, I couldn\'t process this image. Please try again.')
         return NextResponse.json({ ok: true })
       }
       
       const file = await TelegramBotClient.getFile(fileId)
       if (!file.file_path) {
+        console.log('No file_path in getFile response')
         await TelegramBotClient.sendMessage(chatId, 'Sorry, I couldn\'t process this image. Please try again.')
         return NextResponse.json({ ok: true })
       }
@@ -84,8 +96,10 @@ Lütfen dilinizi seçin / Please select your language:
       const extractedText = await extractTextFromImage(fileBuffer)
       
       if (extractedText) {
+        console.log('Text extracted from image')
         await enqueueAnalysis(extractedText, userCountry, chatId)
       } else {
+        console.log('No text extracted from image')
         await TelegramBotClient.sendMessage(chatId, 'Sorry, I couldn\'t extract any text from the image. Please try sending a clearer image or the text directly.')
       }
     }
@@ -98,5 +112,6 @@ Lütfen dilinizi seçin / Please select your language:
 }
 
 export async function GET(request: NextRequest) {
+  console.log('GET request received on webhook endpoint')
   return NextResponse.json({ status: 'Webhook endpoint is active' })
 }
