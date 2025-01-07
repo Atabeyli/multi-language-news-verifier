@@ -9,27 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "grammy": "^1.19.2",
     "next": "14.0.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "node-telegram-bot-api": "^0.61.0",
-    "pino": "^8.14.1",
-    "pino-pretty": "^10.2.0",
-    "tesseract.js": "^4.1.1",
-    "ai": "^2.2.27",
-    "@ai-sdk/openai": "^1.0.0",
-    "lru-cache": "^10.0.1",
-    "@types/node": "20.10.6",
-    "lucide-react": "^0.303.0"
-  },
-  "devDependencies": {
-    "typescript": "5.3.3",
-    "@types/react": "18.2.46",
-    "@types/react-dom": "18.2.18",
-    "@types/node-telegram-bot-api": "^0.61.6",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24",
-    "tailwindcss": "^3.3.2"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
   }
 }
 

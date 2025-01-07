@@ -3,58 +3,66 @@ import type { NextRequest } from 'next/server'
 import { Bot } from "grammy"
 
 export async function GET(req: NextRequest) {
-  console.log("Setup route accessed")
-  
+  console.log("Setup endpoint çağrıldı")
+
   const token = process.env.TELEGRAM_BOT_TOKEN
-  console.log("Token exists:", !!token)
-  
   if (!token) {
-    console.error("TELEGRAM_BOT_TOKEN is not accessible")
+    console.error("TELEGRAM_BOT_TOKEN bulunamadı")
     return NextResponse.json({
-      status: 'error',
-      message: 'TELEGRAM_BOT_TOKEN is not accessible. Please check your environment variables.',
-      debug: {
-        envVars: Object.keys(process.env),
-        nodeEnv: process.env.NODE_ENV
-      }
+      ok: false,
+      error: "Bot token'ı bulunamadı"
     }, { status: 500 })
   }
 
   const bot = new Bot(token)
+  const host = req.headers.get('host')
   
-  const vercelUrl = process.env.VERCEL_URL || req.headers.get('host')
-  console.log("Vercel URL:", vercelUrl)
-  
-  if (!vercelUrl) {
-    console.error("Unable to determine the server URL")
-    return NextResponse.json({ 
-      status: 'error', 
-      message: 'Unable to determine the server URL',
-      debug: {
-        headers: Object.fromEntries(req.headers.entries())
-      }
+  if (!host) {
+    console.error("Host bilgisi alınamadı")
+    return NextResponse.json({
+      ok: false,
+      error: "Host bilgisi alınamadı"
     }, { status: 500 })
   }
-  
-  const webhookUrl = `https://${vercelUrl}/api/webhook`
-  
+
+  const webhookUrl = `https://${host}/api/webhook`
+  console.log("Ayarlanacak webhook URL'i:", webhookUrl)
+
   try {
+    // Mevcut webhook bilgisini al
+    const currentWebhook = await bot.api.getWebhookInfo()
+    console.log("Mevcut webhook durumu:", currentWebhook)
+
+    // Eski webhook'u temizle
+    await bot.api.deleteWebhook()
+    console.log("Eski webhook temizlendi")
+
+    // Yeni webhook'u ayarla
     await bot.api.setWebhook(webhookUrl)
-    console.log(`Webhook set to ${webhookUrl}`)
-    return NextResponse.json({ 
-      status: 'ok', 
-      message: `Webhook successfully set to ${webhookUrl}`,
-      debug: {
-        botInfo: await bot.api.getMe()
+    console.log("Yeni webhook ayarlandı")
+
+    // Bot bilgilerini al
+    const botInfo = await bot.api.getMe()
+    console.log("Bot bilgileri:", botInfo)
+
+    // Yeni webhook durumunu kontrol et
+    const newWebhook = await bot.api.getWebhookInfo()
+    console.log("Yeni webhook durumu:", newWebhook)
+
+    return NextResponse.json({
+      ok: true,
+      bot: botInfo,
+      webhook: {
+        url: webhookUrl,
+        previous: currentWebhook,
+        current: newWebhook
       }
     })
   } catch (error) {
-    console.error("Error setting webhook:", error)
-    return NextResponse.json({ 
-      status: 'error', 
-      message: 'Failed to set webhook', 
-      error: (error as Error).message,
-      stack: (error as Error).stack
+    console.error("Setup hatası:", error)
+    return NextResponse.json({
+      ok: false,
+      error: String(error)
     }, { status: 500 })
   }
 }
