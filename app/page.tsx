@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState } from 'react'
 import { ChevronDown, Globe, Check, AlertCircle, ArrowRight, Search } from 'lucide-react'
 
