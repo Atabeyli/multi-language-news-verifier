@@ -1,4 +1,3 @@
-console.log('Webhook route file loaded');
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { TelegramBotClient } from '@/@lib/telegram-bot'
@@ -7,6 +6,9 @@ import { db } from '@/@lib/db'
 import { enqueueAnalysis } from '@/@lib/queue'
 import { extractTextFromImage } from '@/@lib/image-processor'
 import { Country } from '@/@lib/localization'
+
+console.log('Webhook route file loaded');
+console.log('TELEGRAM_BOT_TOKEN is', process.env.TELEGRAM_BOT_TOKEN ? 'set' : 'not set');
 
 interface TelegramMessage {
   chat: {
@@ -22,7 +24,7 @@ interface TelegramUpdate {
 
 export async function POST(request: NextRequest) {
   try {
-    logger.info('Webhook endpoint hit', { timestamp: new Date().toISOString() })
+    logger.info('Webhook POST request received', { timestamp: new Date().toISOString() })
     
     const rawBody = await request.text()
     logger.info('Raw request body:', rawBody)
@@ -129,7 +131,11 @@ Lütfen dilinizi seçin / Please select your language:
 }
 
 export async function GET(request: NextRequest) {
-  logger.info('GET request received on webhook endpoint')
-  return NextResponse.json({ status: 'Webhook endpoint is active' })
+  logger.info('GET request received on webhook endpoint', { timestamp: new Date().toISOString() })
+  return NextResponse.json({ 
+    status: 'Webhook endpoint is active',
+    message: 'Webhook is running',
+    timestamp: new Date().toISOString()
+  })
 }
 
