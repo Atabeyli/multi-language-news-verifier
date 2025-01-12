@@ -1,3 +1,4 @@
+console.log('Webhook route file loaded');
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { TelegramBotClient } from '@/@lib/telegram-bot'
@@ -42,21 +43,16 @@ export async function POST(request: NextRequest) {
 
     if (text === '/start') {
       logger.info('Processing /start command', { chatId })
-      try {
-        const welcomeMessage = `Haber Doğrulama Asistanı'na Hoş Geldiniz! 🔍
+      const welcomeMessage = `Haber Doğrulama Asistanı'na Hoş Geldiniz! 🔍
 Lütfen dilinizi seçin / Please select your language:
 
 /start_TR - Türkçe 🇹🇷
 /start_AZ - Azərbaycanca 🇦🇿
 /start_RU - Русский 🇷🇺`
 
-        await TelegramBotClient.sendMessage(chatId, welcomeMessage)
-        logger.info('Welcome message sent successfully', { chatId })
-        return NextResponse.json({ ok: true })
-      } catch (error) {
-        logger.error('Error sending welcome message:', { error, chatId })
-        throw error
-      }
+      await TelegramBotClient.sendMessage(chatId, welcomeMessage)
+      logger.info('Welcome message sent successfully', { chatId })
+      return NextResponse.json({ ok: true })
     }
 
     if (text?.startsWith('/start_')) {
@@ -78,14 +74,9 @@ Lütfen dilinizi seçin / Please select your language:
         default:
           message = 'Invalid language selection. Please use /start to choose a language.'
       }
-      try {
-        await TelegramBotClient.sendMessage(chatId, message)
-        logger.info('Language confirmation sent', { chatId, lang })
-        return NextResponse.json({ ok: true })
-      } catch (error) {
-        logger.error('Error sending language confirmation:', { error, chatId })
-        throw error
-      }
+      await TelegramBotClient.sendMessage(chatId, message)
+      logger.info('Language confirmation sent', { chatId, lang })
+      return NextResponse.json({ ok: true })
     }
 
     // Handle regular messages or images
